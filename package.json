@@ -1,0 +1,60 @@
+{
+  "name": "@chaminjector/cut-scheme",
+  "version": "0.0.1",
+  "description": "abstract scheme for x-fiber business scheme",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "files": [
+    "./*"
+  ],
+  "exports": {
+    ".": {
+      "types": "./_types/*.d.ts",
+      "node": "./_cjs/index.js",
+      "require": "./_cjs/index.js"
+    }
+  },
+  "typesVersions": {
+    ">=4.2": {
+      "*": [
+        "_types/*",
+        "types/*"
+      ]
+    }
+  },
+  "scripts": {
+    "build:packages": "rm -rf dist && tsc -p tsconfig.cjs.json && tsc -p tsconfig.types.json && cp package.json dist/package.json",
+    "add:types": "cp -r types dist/types",
+    "add:imports": "echo 'export * from \"../types\";' >> ./dist/_types/index.d.ts",
+    "add:package": "echo '{\"type\": \"commonjs\"}' > dist/_cjs/package.json && cp README.md dist/README.md",
+    "build:dist": "npm run build:packages && npm run add:types && npm run add:imports && npm run add:package",
+    "resolve:path": "tsc-alias -v --dir dist/_cjs -p tsconfig.cjs.json && tsc-alias -v --dir dist/_types -p tsconfig.types.json",
+    "build:prod": "npm run build:dist && npm run resolve:path",
+    "run:cjs:prod": "node ./_cjs/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/x-fiber/cut-scheme.git"
+  },
+  "keywords": [
+    "x-fiber",
+    "cut-scheme",
+    "abstract-scheme"
+  ],
+  "author": {
+    "email": "vladyslav.pestsov@gmail.com",
+    "name": "Vladyslav Pestsov"
+  },
+  "license": "ISC",
+  "engines": {
+    "node": ">=16.13.0"
+  },
+  "bugs": {
+    "url": "https://github.com/x-fiber/cut-scheme/issues"
+  },
+  "homepage": "https://github.com/x-fiber/cut-scheme#readme",
+  "devDependencies": {
+    "nodemon": "^3.0.3",
+    "typescript": "^5.3.3"
+  }
+}
