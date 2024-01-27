@@ -1,3 +1,1 @@
-export * from './abstract.scheme.loader'
-
-
+export * from './scheme.loader';

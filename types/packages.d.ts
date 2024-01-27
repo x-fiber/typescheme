@@ -1,1 +1,1 @@
-export type * as yup from 'yup'
+export type * as yup from 'yup';

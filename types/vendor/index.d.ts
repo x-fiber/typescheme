@@ -1,1 +1,1 @@
-export type * from './setters'
+export type * from './setters';
