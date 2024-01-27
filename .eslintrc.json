@@ -1,0 +1,77 @@
+{
+  "env": {
+    "es2021": true,
+    "node": true,
+    "jest": true
+  },
+  "extends": ["plugin:import/typescript", "prettier"],
+  "overrides": [
+    {
+      "files": ["**/*"],
+      "rules": {
+        "brace-style": "off",
+        "no-use-before-define": "off"
+      }
+    }
+  ],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "project": "./tsconfig.json",
+    "ecmaVersion": 2021,
+    "sourceType": "module"
+  },
+  "plugins": ["@typescript-eslint", "eslint-comments", "promise", "import", "prettier"],
+  "rules": {
+    "prettier/prettier": "error",
+    "import/extensions": [
+      "error",
+      "ignorePackages",
+      {
+        "js": "never",
+        "ts": "never"
+      }
+    ],
+    "no-use-before-define": [
+      "error",
+      {
+        "functions": false,
+        "classes": true,
+        "variables": true
+      }
+    ],
+    "@typescript-eslint/no-use-before-define": [
+      "error",
+      {
+        "functions": false,
+        "classes": true,
+        "variables": true,
+        "typedefs": false
+      }
+    ],
+    "no-new": "off",
+    "no-shadow": "off",
+    "import/prefer-default-export": "off",
+    "import/no-extraneous-dependencies": "off",
+    "@typescript-eslint/no-unused-vars": "off",
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/explicit-function-return-type": "off"
+  },
+  "settings": {
+    "import/parsers": {
+      "@typescript-eslint/parser": [".ts", ".d.ts"]
+    },
+    "import/resolver": {
+      "node": {
+        "extensions": [".js", ".ts", ".d.ts"],
+        "paths": ["."],
+        "moduleDirectory": [".", "node_modules"]
+      },
+      "typescript": {
+        "alwaysTryTypes": true,
+        "extensions": [".js", ".ts"],
+        "project": "./tsconfig.json",
+        "paths": "./tsconfig.json"
+      }
+    }
+  }
+}
