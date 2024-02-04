@@ -1,103 +1,107 @@
 import 'reflect-metadata';
 import { MetadataKeys } from '../common';
+import { loadCommonElements, loadServerElements } from './helpers';
 
-import type {
+import {
   BrokerStructure,
+  DictionaryStructure,
   DocumentStructure,
   EmitterStructure,
-  ISchemeLoader,
+  FnObject,
+  IServerSchemeLoader,
+  NAbstractSchemeLoader,
   RouteStructure,
 } from '@Scheme/Types';
 
-export const setService = (service: string, domains: string[], root: {}): string => {
-  const loader = Reflect.getMetadata(MetadataKeys.SCHEMA_LOADER, Reflect) as ISchemeLoader;
-  if (loader.isDefine) {
-    domains.forEach((domain: string) => loader.applyDomainToService(service, domain));
+export const setService = <S extends string = string, D extends string = string>(
+  service: S,
+  domains: D[],
+  root: DocumentStructure
+): string => {
+  const serverLoader = Reflect.getMetadata(
+    MetadataKeys.SERVER_LOADER,
+    Reflect
+  ) as IServerSchemeLoader;
+  if (serverLoader.isDefine) {
+    domains.forEach((domain: string) => serverLoader.applyDomainToService(service, domain));
   }
 
   return service;
 };
 
-export const setPioneer = (domain: string, documents: DocumentStructure): string => {
-  const loader = Reflect.getMetadata(MetadataKeys.SCHEMA_LOADER, Reflect) as ISchemeLoader;
+export const setEntryPoint = (domain: string, documents: DocumentStructure): string => {
+  const serverLoader = Reflect.getMetadata(
+    MetadataKeys.SERVER_LOADER,
+    Reflect
+  ) as IServerSchemeLoader;
 
-  if (loader.isDefine) {
-    loader.setDomain(domain);
-
-    if (documents.server) {
-      if (documents.server.router) {
-        loader.setRoute(domain, documents.server.router);
-      }
-
-      if (documents.server.emitter) {
-        loader.setEvent(domain, documents.server.emitter);
-      }
-
-      if (documents.server.broker) {
-        loader.setSubject(domain, documents.server.broker);
-      }
-
-      if (documents.server.dictionaries) {
-        loader.setDictionaries(domain, documents.server.dictionaries);
-      }
-    }
-
-    if (documents.webClient) {
-      if (documents.webClient.router) {
-        loader.setRoute(domain, documents.webClient.router);
-      }
-
-      if (documents.webClient.emitter) {
-        loader.setEvent(domain, documents.webClient.emitter);
-      }
-
-      if (documents.webClient.broker) {
-        loader.setSubject(domain, documents.webClient.broker);
-      }
-
-      if (documents.webClient.dictionaries) {
-        loader.setDictionaries(domain, documents.webClient.dictionaries);
-      }
-
-      if (documents.common) {
-        if (documents.common.router) {
-          if (!documents.server?.router || !documents.webClient.router) {
-            loader.setRoute(domain, documents.common.router);
-          }
-        }
-
-        if (documents.common.emitter) {
-          if (!documents.server?.emitter || !documents.webClient.emitter) {
-            loader.setEvent(domain, documents.common.emitter);
-          }
-        }
-
-        if (documents.common.broker) {
-          if (!documents.server?.broker || !documents.webClient.broker) {
-            loader.setSubject(domain, documents.common.broker);
-          }
-        }
-
-        if (documents.common.dictionaries) {
-          if (!documents.server?.dictionaries || !documents.webClient.dictionaries) {
-            loader.setDictionaries(domain, documents.common.dictionaries);
-          }
-        }
-      }
-    }
+  if (serverLoader.isDefine) {
+    if (documents.common) loadCommonElements(serverLoader, domain, documents.common);
+    if (documents.server) loadServerElements(serverLoader, domain, documents.server);
   }
 
   return domain;
 };
 
-export const setRouter = (structure: RouteStructure): RouteStructure => {
+export const setRouter = <R extends string = string, H extends string = string>(
+  structure: RouteStructure<R, H>
+): RouteStructure<R, H> => {
   return structure;
 };
 
-export const setEmitter = (structure: EmitterStructure): EmitterStructure => {
+export const setEmitter = <
+  E extends string = string,
+  H extends string = string,
+  B extends string = string
+>(
+  structure: EmitterStructure<E, H, B>
+): EmitterStructure<E, H, B> => {
   return structure;
 };
 
-export const setBroker = (structure: BrokerStructure): BrokerStructure => {
+export const setBroker = <
+  S extends string = string,
+  H extends string = string,
+  B extends string = string
+>(
+  structure: BrokerStructure<S, H, B>
+): BrokerStructure<S, H, B> => {
   return structure;
+};
+
+export const setDictionary = <
+  L extends string = string,
+  D extends NAbstractSchemeLoader.Dictionary = NAbstractSchemeLoader.Dictionary
+>(
+  structure: DictionaryStructure<L, D>
+): DictionaryStructure<L, D> => {
+  return structure;
+};
+
+export type ScopeResolver<S extends NAbstractSchemeLoader.PlatformScope> = S extends 'server'
+  ? any
+  : S extends 'edge'
+  ? any
+  : S extends 'visualizer'
+  ? any
+  : never;
+
+export type ControllerStructure<
+  H extends FnObject = FnObject,
+  S extends NAbstractSchemeLoader.PlatformScope = NAbstractSchemeLoader.PlatformScope
+> = {
+  scope: S;
+  handlers: H;
+};
+
+export type HelpersStructure<H extends FnObject = FnObject> = H;
+
+export const setController = <
+  H extends FnObject = FnObject,
+  S extends NAbstractSchemeLoader.PlatformScope = NAbstractSchemeLoader.PlatformScope
+>(
+  scope: S,
+  handlers: ScopeResolver<S>
+): ControllerStructure<H, S> => {
+  return { scope, handlers };
 };

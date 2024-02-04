@@ -1,23 +1,29 @@
-import { HttpMethod, KeyStringLiteralBuilder } from '../utility';
-import {
+import type { validator } from '../packages';
+import type { HttpMethod, KeyStringLiteralBuilder } from '../utility';
+import type {
   BrokerStructure,
-  type DictionaryStructure,
+  DictionaryStructure,
   EmitterStructure,
   EventType,
   RouteStructure,
   ValidateStructure,
 } from '../vendor';
-import { validator } from '../packages';
+import type {
+  NEdgeSchemeLoader,
+  NServerSchemeLoader,
+  NVisualizerSchemeLoader,
+} from '@Scheme/Types';
 
-export interface ISchemeLoader {
+export interface IAbstractSchemeLoader<S extends NAbstractSchemeLoader.PlatformScope> {
   readonly isDefine: boolean;
-  readonly services: NAbstractSchemeLoader.Services;
+  readonly services: NAbstractSchemeLoader.Services<S>;
 
   readonly init(): void;
   readonly destroy(): void;
-  readonly applyDomainToService(service: string, domain: string): void;
 
+  readonly applyDomainToService(service: string, domain: string): void;
   readonly setDomain(name: string): void;
+
   readonly setRoute(domain: string, structure: RouteStructure): void;
   readonly getRoute<
     S extends string = string,
@@ -91,7 +97,6 @@ export interface ISchemeLoader {
     domain: string,
     structure: ValidateStructure<H>
   ): void;
-
   readonly getValidator<
     S extends string = string,
     D extends string = string,
@@ -107,6 +112,8 @@ export interface ISchemeLoader {
 }
 
 export namespace NAbstractSchemeLoader {
+  export type PlatformScope = 'server' | 'edge' | 'visualizer';
+
   export type Route<R extends string = string, H extends string = string> = {
     path: R;
     method?: HttpMethod; // default 'GET'
@@ -153,6 +160,19 @@ export namespace NAbstractSchemeLoader {
     validators: Validators;
   }
 
-  export type Domains = Map<string, AbstractDomain>;
-  export type Services = Map<string, Domains>;
+  export type Domains<S extends PlatformScope> = S extends 'server'
+    ? NServerSchemeLoader.ServerDomains
+    : S extends 'edge'
+    ? NEdgeSchemeLoader.EdgeDomains
+    : S extends 'visualizer'
+    ? NVisualizerSchemeLoader.VisualizerDomains
+    : never;
+
+  export type Services<S extends PlatformScope> = S extends 'server'
+    ? NServerSchemeLoader.ServerServices
+    : S extends 'edge'
+    ? NEdgeSchemeLoader.EdgeServices
+    : S extends 'visualizer'
+    ? NVisualizerSchemeLoader.VisualizerServices
+    : never;
 }

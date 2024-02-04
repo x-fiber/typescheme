@@ -1,6 +1,6 @@
-import { HttpMethod } from '../utility';
-
-export type EnvironmentType = 'server' | 'web-client';
+import { AnyFn, FnObject, HttpMethod, type UnknownObject } from '../utility';
+import { ControllerStructure, HelpersStructure } from '../../src';
+import { NAbstractSchemeLoader } from '../loaders';
 
 export type RouteStructure<R extends string = string, H extends string = string> = {
   readonly [key in T]: {
@@ -51,10 +51,13 @@ export type BrokerStructure<
 };
 
 export type ValidateStructure<H extends string = string> = {
-  readonly [key in H]: ValidateHandler;
+  readonly [key in H]: NAbstractSchemeLoader.ValidateHandler;
 };
 
-export type DictionaryStructure<L extends string = string, D extends Dictionary = Dictionary> = {
+export type DictionaryStructure<
+  L extends string = string,
+  D extends NAbstractSchemeLoader.Dictionary = NAbstractSchemeLoader.Dictionary
+> = {
   language: L;
   dictionary: D;
 };
@@ -66,8 +69,22 @@ export type CommonDocuments = {
   dictionaries?: DictionaryStructure | DictionaryStructure[];
 };
 
-export type DocumentStructure = {
+export type TypeormDocuments<M> = {
+  model: M;
+  schema: AnyFn;
+  repository: FnObject;
+};
+
+export type ServerDocuments = {
+  typeorm?: TypeormDocuments;
+  controller?: ControllerStructure;
+  helpers?: HelpersStructure;
+};
+
+export type DocumentStructure<M extends string = string> = {
   common?: CommonDocuments;
-  server?: CommonDocuments & {};
-  webClient?: CommonDocuments & {};
+  server?: ServerDocuments;
+  webClient?: {
+    controller: ControllerStructure;
+  };
 };

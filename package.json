@@ -1,6 +1,6 @@
 {
-  "name": "@chaminjector/cut-scheme",
-  "version": "0.0.1",
+  "name": "@chaminjector/typescheme",
+  "version": "0.0.5",
   "description": "abstract scheme for x-fiber business scheme",
   "main": "index.js",
   "types": "index.d.ts",
@@ -66,8 +66,9 @@
     "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-promise": "^6.1.1",
     "eslint-plugin-unused-imports": "^2.0.0",
-    "prettier": "^2.8.7",
     "nodemon": "^3.0.3",
+    "prettier": "^2.8.7",
+    "tsc-alias": "^1.8.8",
     "typescript": "^5.3.3"
   },
   "dependencies": {

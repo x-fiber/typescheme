@@ -1,42 +1,44 @@
 import { yup } from '../packages';
 import type {
+  IAbstractSchemeLoader,
+  NAbstractSchemeLoader,
   BrokerStructure,
   DictionaryStructure,
   EmitterStructure,
   HttpMethod,
-  ISchemeLoader,
   KeyStringLiteralBuilder,
-  NAbstractSchemeLoader,
   RouteStructure,
   ValidateStructure,
 } from '@Scheme/Types';
 
-export class SchemeLoader implements ISchemeLoader {
-  private _SERVICES: NAbstractSchemeLoader.Services | undefined;
-  private _DOMAINS: NAbstractSchemeLoader.Domains | undefined;
+export abstract class AbstractSchemeLoader<T extends NAbstractSchemeLoader.PlatformScope>
+  implements IAbstractSchemeLoader<T>
+{
+  protected abstract _DOMAINS: NAbstractSchemeLoader.Domains<T> | undefined;
+  protected abstract _SERVICES: NAbstractSchemeLoader.Services<T> | undefined;
 
   public init(): void {
-    this._SERVICES = new Map<string, NAbstractSchemeLoader.Domains>();
-    this._DOMAINS = new Map<string, NAbstractSchemeLoader.AbstractDomain>();
+    this._DOMAINS = new Map() as NAbstractSchemeLoader.Domains<T>;
+    this._SERVICES = new Map() as NAbstractSchemeLoader.Services<T>;
   }
 
   public destroy(): void {
-    this._SERVICES = undefined;
     this._DOMAINS = undefined;
+    this._SERVICES = undefined;
   }
 
   public get isDefine(): boolean {
     return typeof this._SERVICES !== 'undefined' && typeof this._DOMAINS !== 'undefined';
   }
 
-  public get services(): NAbstractSchemeLoader.Services {
+  public get services(): NAbstractSchemeLoader.Services<T> {
     if (!this._SERVICES) {
       throw new Error('Services collection not initialize.');
     }
     return this._SERVICES;
   }
 
-  private get _domains(): NAbstractSchemeLoader.Domains {
+  protected get _domains(): NAbstractSchemeLoader.Domains<T> {
     if (!this._DOMAINS) {
       throw new Error('Domains collection not initialize.');
     }
@@ -47,7 +49,7 @@ export class SchemeLoader implements ISchemeLoader {
   public applyDomainToService(service: string, domain: string): void {
     const sStorage = this.services.get(service);
     if (!sStorage) {
-      this.services.set(service, new Map<string, NAbstractSchemeLoader.AbstractDomain>());
+      this.services.set(service, new Map());
       this.applyDomainToService(service, domain);
       return;
     }
@@ -60,18 +62,7 @@ export class SchemeLoader implements ISchemeLoader {
     sStorage.set(domain, dStorage);
   }
 
-  public setDomain(name: string): void {
-    const domain = this._domains.get(name);
-    if (!domain) {
-      this._domains.set(name, {
-        routes: new Map<string, NAbstractSchemeLoader.Route>(),
-        events: new Map<string, NAbstractSchemeLoader.Event>(),
-        subjects: new Map<string, NAbstractSchemeLoader.Subject>(),
-        dictionaries: new Map<string, NAbstractSchemeLoader.Dictionary>(),
-        validators: new Map<string, NAbstractSchemeLoader.ValidateHandler>(),
-      });
-    }
-  }
+  public abstract setDomain(name: string): void;
 
   public setRoute(domain: string, structure: RouteStructure): void {
     const storage = this._domains.get(domain);
